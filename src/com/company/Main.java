@@ -162,18 +162,20 @@ public class Main
 		  
 		  System.out.println("Session key bytes: " + CryptoUtils.toHex(sessionKey.getEncoded()));
 		  
-		  //now use tha that session key and IV to create a CipherInputStream. We will use them to read all character
-		  //that are sent to us by the client
+		  //create a receive runnable class and a send runnable class and create threads for both of them then
+		  //start both threads
 
 		  Receive rec = new Receive(iv, sessionKey, socket);
 		  Send snd = new Send(iv, sessionKey, socket);
-		  rec.run();
-		  snd.run();
+		  Thread outT = new Thread(snd);
+		  Thread inT = new Thread(rec);
+		  inT.start();
+		  outT.start();
 
 
 
-		  in.close();
-		  out.close();
-		  socket.close();
+		  // in.close();
+		  //out.close();
+		  //socket.close();
 	  }
 }	  

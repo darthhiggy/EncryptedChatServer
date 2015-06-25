@@ -41,7 +41,7 @@ public class Receive implements Runnable
             //once -1 is received we want to close up our stream and exit
 
 
-            cipherIn.close();
+            //cipherIn.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

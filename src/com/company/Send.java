@@ -2,6 +2,7 @@ package com.company;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import java.net.Socket;
@@ -26,24 +27,30 @@ public class Send implements Runnable
     public void run()
     {
         try {
+            //now use tha that session key and IV to create a CipherInputStream. We will use them to read all character
+            //that are sent to us by the client
+
             System.out.println("Creating the cipher stream ...");
-            Cipher decrypter = Cipher.getInstance("DESede/CFB8/NoPadding");
+            Cipher encrypter = Cipher.getInstance("DESede/CFB8/NoPadding");
             IvParameterSpec spec = new IvParameterSpec(iv);
-            decrypter.init(Cipher.DECRYPT_MODE, sessionKey, spec);
-            CipherInputStream cipherIn = new CipherInputStream(socket.getInputStream(), decrypter);
+            encrypter.init(Cipher.ENCRYPT_MODE, sessionKey, spec);
+            CipherOutputStream cipherOut = new CipherOutputStream(socket.getOutputStream(), encrypter);
 
-            //we just keep reading the input and print int to the screen, until -1 sent over
+            //we are connected securely. we can now send data to sever, which we gather from the keyboard
 
+            String testString = "Etablished Connection \n\n";
+            byte[] byteArray = testString.getBytes();
+            cipherOut.write(byteArray);
+
+            //now send everything the user types
             int theCharacter = 0;
-            theCharacter = cipherIn.read();
-            while (theCharacter != -1) {
-                System.out.print((char) theCharacter);
-                theCharacter = cipherIn.read();
-
+            theCharacter = System.in.read();
+            while(theCharacter != '~') //~ is an escape character to exit
+            {
+                cipherOut.write(theCharacter);
+                theCharacter = System.in.read();
             }
-            //once -1 is received we want to close up our stream and exit
-
-            cipherIn.close();
+            //cipherOut.close();
         } catch(Exception e)
         {
             e.printStackTrace();
